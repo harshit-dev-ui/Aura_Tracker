@@ -1,38 +1,45 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import {
   signUpFailure,
   signUpStart,
   signUpSuccess,
 } from "../redux/slices/auth/userSlice";
 import { registerUser } from "../redux/slices/auth/apiService";
+
 const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm();
+
+  // Watch the 'role' field using useWatch
+  //   const role = useWatch({
+  //     control,
+  //     name: "role",
+  //     defaultValue: "student",
+  //   });
+
   const onSubmit = async (data) => {
-    console.log(data);
     const requestData = {
       username: data.username,
       role: data.role,
       regNo: data.regNo,
       semester: data.semester,
-      email: data.email.toLowerCase(), // Ensure email is in lowercase
+      email: data.email.toLowerCase(),
       password: data.password,
     };
-
     dispatch(signUpStart());
     try {
       const response = await registerUser(requestData);
       dispatch(signUpSuccess(response.data));
       localStorage.setItem("token", response.data.token);
       console.log(`${response}: Signup successful`);
-      console.log("State after signUpSuccess:", store.getState());
     } catch (error) {
       dispatch(signUpFailure(data));
       console.log(`Signup failed: ${error}`);
@@ -73,20 +80,36 @@ const Signup = () => {
               Instructor
             </label>
           </div>
+
+          {/* Conditionally disable fields based on role
           <input
             type="text"
-            placeholder="Registeration Number"
-            {...register("regNo", { required: "Role is required" })}
-            required
-            className="w-full px-4 py-2 border rounded-md"
+            placeholder="Registration Number"
+            {...register("regNo", {
+              required:
+                role === "student" ? "Registration Number is required" : false,
+            })}
+            required={role === "student"}
+            className={
+              role === "instructor"
+                ? "hidden"
+                : "w-full px-4 py-2 border rounded-md"
+            }
           />
           <input
             type="text"
             placeholder="Semester"
-            {...register("semester", { required: "Semester is required" })}
-            required
-            className="w-full px-4 py-2 border rounded-md"
-          />
+            {...register("semester", {
+              required: role === "student" ? "Semester is required" : false,
+            })}
+            required={role === "student"}
+            className={
+              role === "instructor"
+                ? "hidden"
+                : "w-full px-4 py-2 border rounded-md"
+            }
+          /> */}
+
           <input
             type="email"
             placeholder="Email"
@@ -97,7 +120,7 @@ const Signup = () => {
           <input
             type="password"
             placeholder="Password"
-            {...register("password", { required: "password is required" })}
+            {...register("password", { required: "Password is required" })}
             required
             className="w-full px-4 py-2 border rounded-md"
           />

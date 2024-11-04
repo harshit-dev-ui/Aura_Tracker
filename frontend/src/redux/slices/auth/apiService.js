@@ -9,7 +9,6 @@ const apiClient = axios.create({
   withCredentials: true, // Allow sending cookies with requests
 });
 
-// User registration
 export const registerUser = async (userData) => {
   try {
     const response = await apiClient.post("/api/user/register", userData, {
@@ -19,6 +18,42 @@ export const registerUser = async (userData) => {
     return response.data;
   } catch (error) {
     console.error("Error during registration:", error);
+    throw error;
+  }
+};
+
+export const loginUser = async (loginData) => {
+  try {
+    const response = await apiClient.post("/api/user/login", loginData, {
+      withCredentials: true,
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error("Error during login:", error);
+    throw error;
+  }
+};
+
+// Check if user is authenticated
+export const checkAuth = async () => {
+  try {
+    const response = await apiClient.get("/api/user/check-auth");
+    console.log("User is authenticated:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error checking authentication:", error);
+    return false;
+  }
+};
+
+export const logoutUser = async () => {
+  try {
+    const response = await apiClient.post("/api/user/logout");
+
+    return response.data;
+  } catch (error) {
+    console.error("Error during logout:", error);
     throw error;
   }
 };
