@@ -1,5 +1,5 @@
 import React from "react";
-
+import Goals from "../components/Goals";
 function Dashboard() {
   return (
     <div className="flex h-screen space-between">
@@ -10,7 +10,7 @@ function Dashboard() {
         Container 2
       </div>
       <div className="flex-1 bg-gray-200 flex items-center justify-center text-lg text-gray-700 m-4">
-        Container 3
+        <Goals />
       </div>
     </div>
   );
