@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(
     credentials: true, // Allow credentials (cookies) to be sent with CORS requests
   })
 );
+app.use(cookieParser());
 app.use(express.json());
 
 //api routes
