@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useForm, useWatch } from "react-hook-form";
 import {
   signUpFailure,
@@ -17,13 +18,16 @@ const Signup = () => {
     control,
     formState: { errors },
   } = useForm();
+  const { loading, currentUser } = useSelector((state) => state.user);
 
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/");
+    }
+  }, [navigate, currentUser]);
   const onSubmit = async (data) => {
     const requestData = {
       username: data.username,
-      role: data.role,
-      regNo: data.regNo,
-      semester: data.semester,
       email: data.email.toLowerCase(),
       password: data.password,
     };
