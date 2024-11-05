@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const CoursesEnrolled = () => {
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
     const [courses, setCourses] = useState([
         {
             _id: '1',
@@ -57,7 +57,7 @@ const CoursesEnrolled = () => {
     };
 
     const handleSelectCourse = (courseId) => {
-        navigate(`/courses/${courseId}`); // Navigate to course detail page
+        navigate(`/courses/${courseId}`);
     };
 
     return (
