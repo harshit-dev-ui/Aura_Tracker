@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useForm, useWatch } from "react-hook-form";
 import {
   loginInFailure,
@@ -7,7 +8,7 @@ import {
   loginInSuccess,
 } from "../redux/slices/auth/userSlice";
 import { loginUser } from "../redux/slices/auth/apiService";
-
+import { store } from "../redux/store";
 const Signup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -16,12 +17,20 @@ const Signup = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const { loading, currentUser } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/");
+    }
+  }, [navigate, currentUser]);
   const onSubmit = async (data) => {
     dispatch(loginInStart());
     try {
       const response = await loginUser(data);
-      const { _id, email, phoneNumber, fullname } = response.data;
-      dispatch(loginInSuccess({ email, _id, phoneNumber, fullname }));
+      const { _id, email, username } = response;
+
+      dispatch(loginInSuccess({ email, _id, username }));
 
       console.log(`${response}:Login succesfully`);
       console.log("State after loginInSuccess:", store.getState());

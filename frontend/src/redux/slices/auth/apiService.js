@@ -11,7 +11,7 @@ const apiClient = axios.create({
 
 export const registerUser = async (userData) => {
   try {
-    const response = await apiClient.post("/api/user/register", userData, {
+    const response = await apiClient.post("/api/auth/signup", userData, {
       withCredentials: true,
     });
     console.log(response);
@@ -24,7 +24,7 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (loginData) => {
   try {
-    const response = await apiClient.post("/api/user/login", loginData, {
+    const response = await apiClient.post("/api/auth/login", loginData, {
       withCredentials: true,
     });
     console.log(response);
@@ -38,7 +38,7 @@ export const loginUser = async (loginData) => {
 // Check if user is authenticated
 export const checkAuth = async () => {
   try {
-    const response = await apiClient.get("/api/user/check-auth");
+    const response = await apiClient.get("/api/auth/check-auth");
     console.log("User is authenticated:", response.data);
     return response.data;
   } catch (error) {
@@ -49,7 +49,7 @@ export const checkAuth = async () => {
 
 export const logoutUser = async () => {
   try {
-    const response = await apiClient.post("/api/user/logout");
+    const response = await apiClient.post("/api/auth/logout");
 
     return response.data;
   } catch (error) {

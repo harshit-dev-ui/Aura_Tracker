@@ -1,34 +1,34 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const UserSchema =  new mongoose.Schema({
+const UserSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    auraPoints: {
+      type: Number,
+      default: 0, // Set default to 0 for new users
+    },
+    enrolledCourse: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course", // Assuming there is a Course model
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
-    _id :{
-        type :mongoose.Schema.Types.ObjectId,
-        required : true,
-        unique : true
-    },
-    username:{
-        type : String,
-        required : true,
-        unique :true
-    },
-    email: { 
-        type: String, 
-        required: true, 
-        unique: true 
-    },
-    password: { 
-        type: String 
-    },
-    auraPoints:{
-        type : Number,
-        required: true
-    },
-    enrolledCourse: {
-        type : [mongoose.Schema.Types.ObjectId]
-    }
-}, {timestamps :true});
-
-
-const User = mongoose.model('User', UserSchema);
+const User = mongoose.model("User", UserSchema);
 export default User;
