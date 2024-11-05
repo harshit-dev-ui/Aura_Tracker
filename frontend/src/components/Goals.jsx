@@ -35,11 +35,11 @@ function Goals() {
 
   // Mark a goal as completed
   const toggleCompletion = (index) => {
-    setGoals((prevGoals) => {
-      const updatedGoals = [...prevGoals];
-      updatedGoals[index].isCompleted = !updatedGoals[index].isCompleted;
-      return updatedGoals;
-    });
+    setGoals((prevGoals) =>
+      prevGoals.map((goal, i) =>
+        i === index ? { ...goal, isCompleted: !goal.isCompleted } : goal
+      )
+    );
   };
 
   // Remove completed goals with today's deadline at the end of the day
@@ -67,19 +67,33 @@ function Goals() {
     return goalDate.getTime() > today.getTime();
   });
 
+  // Function to determine background color based on priority
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-600";
+      case "medium":
+        return "bg-yellow-500";
+      default:
+        return "bg-green-500";
+    }
+  };
+
   return (
-    <div className="flex flex-col justify-start items-center gap-4 px-3 py-3">
-      <h1 className="text-xl font-bold">Goals</h1>
-      <div className="bg-slate-400 w-full px-2 flex flex-col items-center py-4">
+    <div className="flex flex-col items-center gap-2">
+      <h1 className="text-2xl font-bold">Goals</h1>
+      <div className="bg-gray-100 w-[400px] px-2 flex flex-col items-center py-4">
         <h2 className="text-lg font-semibold">Today's Goals</h2>
-        <div className="w-full">
+        <div className="w-full max-h-48 overflow-y-auto">
           {todaysGoals.length === 0 ? (
             <p className="text-center text-gray-600">No goals for today.</p>
           ) : (
             todaysGoals.map((goal, index) => (
               <div
                 key={index}
-                className={`bg-black text-white p-2 m-2 rounded flex items-center ${
+                className={`${getPriorityColor(
+                  goal.priority
+                )} text-white p-2 m-2 rounded flex items-center ${
                   goal.isCompleted ? "line-through opacity-50" : ""
                 }`}
               >
@@ -100,14 +114,19 @@ function Goals() {
         </div>
       </div>
 
-      <div className="bg-slate-400 w-full px-2 flex flex-col items-center py-4 mt-4">
+      <div className="bg-gray-100 w-full px-2 flex flex-col items-center py-4 mt-4">
         <h2 className="text-lg font-semibold">Future Goals</h2>
         <div className="w-full">
           {futureGoals.length === 0 ? (
             <p className="text-center text-gray-600">No future goals set.</p>
           ) : (
             futureGoals.map((goal, index) => (
-              <div key={index} className="bg-black text-white p-2 m-2 rounded">
+              <div
+                key={index}
+                className={`${getPriorityColor(
+                  goal.priority
+                )} text-white p-2 m-2 rounded`}
+              >
                 <h3 className="font-semibold">{goal.title}</h3>
                 <p>Deadline: {goal.deadline}</p>
                 <p>Priority: {goal.priority}</p>
