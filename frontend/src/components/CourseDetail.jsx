@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCourseById, addModule, deleteModule, addTopic, deleteTopic, completeTopic } from '../utils/courseService';
+import { getCourseById, addModule, deleteModule, addTopic, deleteTopic, completeTopic, deleteCourse } from '../utils/courseService';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'; // For dropdown icons
 
 const CourseDetail = () => {
@@ -138,15 +138,43 @@ const CourseDetail = () => {
             : 0;
     };
 
+    const handleDeleteCourse = async () => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this course?');
+        if (confirmDelete) {
+            try {
+                await deleteCourse(courseId);
+                alert("Course deleted successfully");
+                navigate('/courses');
+            } catch (error) {
+                console.error(error.message);
+                alert("Failed to delete the course. Please try again.");
+            }
+        }
+    };
+
     if (!course || !course.modules) {
         return <div>Loading...</div>;
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white border rounded-lg shadow-md mt-10">
-            <h2 className="text-3xl font-bold text-gray-700">{course?.name}</h2>
+        <div className="max-w-4xl mx-auto p-6 bg-white border rounded-lg shadow-md mt-10 relative">
+            {/* Delete Course Button positioned top-right */}
+            <div className="absolute top-4 right-4">
+                <button
+                    onClick={handleDeleteCourse}
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                    Delete Course
+                </button>
+            </div>
+
+            {/* Course Heading and Delete Button */}
+            <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-bold text-gray-700">{course?.name}</h2>
+            </div>
             <p className="text-gray-500 mt-2">{course?.description}</p>
 
+            {/* Course Progress */}
             <div className="mt-4">
                 <h3 className="text-lg font-semibold text-gray-700">Course Progress</h3>
                 <div className="w-full bg-gray-300 h-2 mt-2">
@@ -155,6 +183,7 @@ const CourseDetail = () => {
                 <p className="text-gray-600 mt-1">Progress: {calculateCourseProgress()}%</p>
             </div>
 
+            {/* Add Module */}
             <div className="mt-6">
                 <h3 className="text-lg font-semibold text-gray-700">Add Module</h3>
                 <div className="flex items-center space-x-2">
@@ -174,6 +203,7 @@ const CourseDetail = () => {
                 </div>
             </div>
 
+            {/* Modules Section */}
             <h3 className="text-lg font-semibold text-gray-700 mt-6">Modules</h3>
             <ul className="divide-y divide-gray-200 mt-2">
                 {course.modules.map((module) => {
@@ -181,6 +211,7 @@ const CourseDetail = () => {
 
                     return (
                         <li key={module._id} className="py-4">
+                            {/* Module Progress Bar */}
                             <div className="mb-2">
                                 <div className="w-full bg-gray-300 h-2">
                                     <div
@@ -190,6 +221,7 @@ const CourseDetail = () => {
                                 </div>
                             </div>
 
+                            {/* Module Title and Delete Button */}
                             <div className="flex justify-between items-center">
                                 <span className="font-semibold text-2xl text-blue-700">{module.title}</span>
                                 <button
@@ -200,25 +232,24 @@ const CourseDetail = () => {
                                 </button>
                             </div>
 
+                            {/* Dropdown to Show/Hide Topics */}
                             <div className="mt-4">
                                 <button
                                     onClick={() => toggleDropdown(module._id)}
                                     className="text-blue-500 hover:underline flex items-center"
                                 >
                                     {expandedModules[module._id] ? (
-                                        <>
-                                            <FaChevronUp /> Hide Topics
-                                        </>
+                                        <FaChevronUp /> 
                                     ) : (
-                                        <>
-                                            <FaChevronDown /> Show Topics
-                                        </>
+                                        <FaChevronDown />
                                     )}
+                                    {expandedModules[module._id] ? ' Hide Topics' : ' Show Topics'}
                                 </button>
 
+                                {/* Topics Section */}
                                 {expandedModules[module._id] && (
                                     <div className="mt-2">
-                                        <h4 className="text-lg font-semibold    ">Topics</h4>
+                                        <h4 className="text-lg font-semibold">Topics</h4>
                                         {module.topics.length === 0 && <p>No topics yet</p>}
                                         <ul className="mt-2">
                                             {module.topics.map((topic) => (
