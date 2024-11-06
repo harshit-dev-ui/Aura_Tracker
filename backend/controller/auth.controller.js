@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import User from "../model/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const login = async (req, res) => {
   try {
@@ -65,4 +68,36 @@ export const logout = async (req, res) => {
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
   }
+};
+
+export const googleAuth = async (req, res) => {
+    const { tokenId } = req.body;
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: tokenId,
+            audience: process.env.GOOGLE_CLIENT_ID,     
+        });
+
+        const { email, name, sub } = ticket.getPayload();
+        let user = await User.findOne({ googleId: sub });
+
+        if (user) {
+            generateTokenAndSetCookie(user._id, res);
+
+            return res.status(200).json({ user: { id: user._id, username: user.username, email: user.email} });
+        } else {
+
+            user = await User.create({ 
+                googleId: sub, 
+                username: name, 
+                email,
+            });
+
+            generateTokenAndSetCookie(user._id, res);
+
+            return res.status(200).json({ user: { id: user._id, username: user.username, email: user.email } });
+        }
+    } catch (err) {
+        res.status(500).json({ msg: 'Server error' });
+    }
 };
