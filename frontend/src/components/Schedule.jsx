@@ -14,39 +14,45 @@ const Schedule = () => {
   });
 
   const openCalendar = () => {
-    // Placeholder function to open Google Calendar or another detailed view
     alert("Opening full calendar view...");
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white border rounded-lg shadow-md mt-10">
-      <h2 className="text-xl font-semibold text-gray-700 mb-4">Today's Schedule</h2>
-      <ul className="divide-y divide-gray-200">
-        {schedule.today.map(event => (
-          <li key={event.id} className="py-4 flex justify-between items-center">
-            <div>
-              <p className="text-lg font-medium text-gray-800">{event.name}</p>
-              <p className="text-sm text-gray-600">{event.type} at {event.time}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="max-w-xl mx-auto p-6 bg-white border border-gray-300 rounded-lg shadow-lg mt-8">
+      {/* Today's Schedule Section */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Today's Schedule</h2>
+        <ul className="divide-y divide-gray-200">
+          {schedule.today.map(event => (
+            <li key={event.id} className="py-4 flex justify-between items-center hover:bg-gray-50 transition duration-200">
+              <div>
+                <p className="text-lg font-medium text-gray-900">{event.name}</p>
+                <p className="text-sm text-gray-600">{event.type} at {event.time}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-      <h2 className="text-xl font-semibold text-gray-700 mt-6 mb-4">Upcoming Events</h2>
-      <ul className="divide-y divide-gray-200">
-        {schedule.upcoming.map(event => (
-          <li key={event.id} className="py-4 flex justify-between items-center">
-            <div>
-              <p className="text-lg font-medium text-gray-800">{event.name}</p>
-              <p className="text-sm text-gray-600">{event.type} on {event.date} at {event.time}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {/* Upcoming Events Section */}
+      <div>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Upcoming Events</h2>
+        <ul className="divide-y divide-gray-200">
+          {schedule.upcoming.map(event => (
+            <li key={event.id} className="py-4 flex justify-between items-center hover:bg-gray-50 transition duration-200">
+              <div>
+                <p className="text-lg font-medium text-gray-900">{event.name}</p>
+                <p className="text-sm text-gray-600">{event.type} on {event.date} at {event.time}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
+      {/* View Full Calendar Button */}
       <button
         onClick={openCalendar}
-        className="mt-6 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        className="mt-6 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
       >
         View Full Calendar
       </button>

@@ -1,157 +1,276 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getCourseById, addModule, deleteModule, addTopic, deleteTopic, completeTopic } from '../utils/courseService';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa'; // For dropdown icons
 
 const CourseDetail = () => {
-  const { courseId } = useParams();
+    const { courseId } = useParams();
+    const navigate = useNavigate();
+    const [course, setCourse] = useState(null);
+    const [newModuleName, setNewModuleName] = useState('');
+    const [newTopicNames, setNewTopicNames] = useState({});
+    const [expandedModules, setExpandedModules] = useState({}); // Used for showing dropdown menu
 
-  const initialCourseDetails = {
-    '1': {
-      name: 'Introduction to Psychology',
-      modules: [
-        { title: 'Module 1', topics: [{ title: 'Topic 1.1', completed: false }, { title: 'Topic 1.2', completed: false }] },
-        { title: 'Module 2', topics: [{ title: 'Topic 2.1', completed: false }, { title: 'Topic 2.2', completed: false }] }
-      ],
-      progress: 0,
-    },
-    '2': {
-      name: 'Calculus I',
-      modules: [
-        { title: 'Module 1', topics: [{ title: 'Topic 1.1', completed: false }, { title: 'Topic 1.2', completed: false }, { title: 'Topic 1.3', completed: false }] },
-        { title: 'Module 2', topics: [{ title: 'Topic 2.1', completed: false }, { title: 'Topic 2.2', completed: false }] },
-        { title: 'Module 3', topics: [{ title: 'Topic 3.1', completed: false }] }
-      ],
-      progress: 0,
-    },
-    '3': {
-      name: 'Computer Science Basics',
-      modules: [
-        { title: 'Module 1', topics: [{ title: 'Topic 1.1', completed: false }, { title: 'Topic 1.2', completed: false }] },
-        { title: 'Module 2', topics: [{ title: 'Topic 2.1', completed: false }, { title: 'Topic 2.2', completed: false }] },
-        { title: 'Module 3', topics: [{ title: 'Topic 3.1', completed: false }, { title: 'Topic 3.2', completed: false }] },
-        { title: 'Module 4', topics: [{ title: 'Topic 4.1', completed: false }] }
-      ],
-      progress: 0,
-    },
-  };
+    useEffect(() => {
+        const fetchCourse = async () => {
+            try {
+                const data = await getCourseById(courseId);
+                if (data) {
+                    setCourse(data);
+                } else {
+                    alert("You are not enrolled in this course.");
+                    navigate('/courses');
+                }
+            } catch (error) {
+                console.error("Error fetching course:", error);
+                alert("Failed to fetch course details. Please try again.");
+            }
+        };
 
-  const [course, setCourse] = useState(initialCourseDetails[courseId]);
-  const [newModuleTitle, setNewModuleTitle] = useState('');
-  const [newTopicTitle, setNewTopicTitle] = useState('');
-  const [activeModuleIndex, setActiveModuleIndex] = useState(null);
-  const [collapsedModules, setCollapsedModules] = useState(
-    course.modules.map(() => true)
-  );
+        fetchCourse();
+    }, [courseId, newModuleName, newTopicNames]);
 
-  const handleTopicCompletion = (moduleIndex, topicIndex) => {
-    const updatedModules = [...course.modules];
-    updatedModules[moduleIndex].topics[topicIndex].completed = !updatedModules[moduleIndex].topics[topicIndex].completed;
+    const calculateCourseProgress = () => {
+        if (!course) return 0;
+        const totalTopics = course.modules.reduce((sum, module) => sum + (module.topics.length), 0);
+        const completedTopics = course.modules.reduce((sum, module) => sum + (module.topics.filter(topic => topic.completed).length), 0);
+        return totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+    };
 
-    setCourse({ ...course, modules: updatedModules });
+    const handleAddModule = async () => {
+        try {
+            if (!newModuleName) throw new Error('Please enter Module Name');
+            const newModule = { title: newModuleName };
+            const addedModule = await addModule(courseId, newModule);
+            setCourse(prevCourse => ({ ...prevCourse, modules: [...prevCourse.modules, addedModule] }));
+            setNewModuleName('');
+        } catch (error) {
+            console.error(error.message);
+            alert(error.message);
+        }
+    };
 
-    const totalTopics = updatedModules.reduce((acc, mod) => acc + mod.topics.length, 0);
-    const completed = updatedModules.reduce((acc, mod) => acc + mod.topics.filter(topic => topic.completed).length, 0);
-    const progress = (completed / totalTopics) * 100;
+    const handleDeleteModule = async (moduleId) => {
+        try {
+            await deleteModule(courseId, moduleId);
+            setCourse(prevCourse => ({
+                ...prevCourse,
+                modules: prevCourse.modules.filter(module => module._id !== moduleId),
+            }));
+        } catch (error) {
+            console.error(error.message);
+            alert(error.message);
+        }
+    };
 
-    setCourse(prev => ({ ...prev, progress }));
-  };
+    const handleAddTopic = async (moduleId) => {
+        try {
+            const newTopicName = newTopicNames[moduleId];
+            if (!newTopicName) throw new Error('Please enter Topic Name');
+            const newTopic = { title: newTopicName };
+            const addedTopic = await addTopic(courseId, moduleId, newTopic);
+            setCourse(prevCourse => ({
+                ...prevCourse,
+                modules: prevCourse.modules.map(module =>
+                    module._id === moduleId ? { ...module, topics: [...module.topics, addedTopic] } : module
+                ),
+            }));
+            setNewTopicNames(prevNames => ({ ...prevNames, [moduleId]: '' }));
+        } catch (error) {
+            console.error(error.message);
+            alert(error.message);
+        }
+    };
 
-  const addModule = () => {
-    if (newModuleTitle) {
-      setCourse(prev => ({
-        ...prev,
-        modules: [...prev.modules, { title: newModuleTitle, topics: [] }]
-      }));
-      setNewModuleTitle('');
-      setCollapsedModules([...collapsedModules, true]);
+    const handleDeleteTopic = async (moduleId, topicId) => {
+        try {
+            await deleteTopic(courseId, moduleId, topicId);
+            setCourse(prevCourse => ({
+                ...prevCourse,
+                modules: prevCourse.modules.map(module =>
+                    module._id === moduleId
+                        ? { ...module, topics: module.topics.filter(topic => topic._id !== topicId) }
+                        : module
+                ),
+            }));
+        } catch (error) {
+            console.error(error.message);
+            alert(error.message);
+        }
+    };
+
+    const handleMarkTopicComplete = async (moduleId, topicId) => {
+        try {
+            await completeTopic(courseId, moduleId, topicId);
+            setCourse(prevCourse => ({
+                ...prevCourse,
+                modules: prevCourse.modules.map(module =>
+                    module._id === moduleId
+                        ? {
+                            ...module,
+                            topics: module.topics.map(topic =>
+                                topic._id === topicId
+                                    ? { ...topic, completed: !topic.completed }
+                                    : topic
+                            ),
+                        }
+                        : module
+                ),
+            }));
+        } catch (error) {
+            console.error(error.message);
+            alert(error.message);
+        }
+    };
+
+    const handleTopicInputChange = (moduleId, value) => {
+        setNewTopicNames(prevNames => ({ ...prevNames, [moduleId]: value }));
+    };
+
+    const toggleDropdown = (moduleId) => {
+        setExpandedModules(prev => ({ ...prev, [moduleId]: !prev[moduleId] }));
+    };
+
+    const getModuleProgress = (module) => {
+        const topics = module.topics || [];
+        return topics.length > 0
+            ? Math.round((topics.filter(topic => topic.completed).length / topics.length) * 100)
+            : 0;
+    };
+
+    if (!course || !course.modules) {
+        return <div>Loading...</div>;
     }
-  };
 
-  const addTopic = (moduleIndex) => {
-    if (newTopicTitle) {
-      const updatedModules = [...course.modules];
-      updatedModules[moduleIndex].topics.push({ title: newTopicTitle, completed: false });
-      setCourse({ ...course, modules: updatedModules });
-      setNewTopicTitle('');
-      setActiveModuleIndex(null); 
-    }
-  };
+    return (
+        <div className="max-w-4xl mx-auto p-6 bg-white border rounded-lg shadow-md mt-10">
+            <h2 className="text-3xl font-bold text-gray-700">{course?.name}</h2>
+            <p className="text-gray-500 mt-2">{course?.description}</p>
 
-  const toggleModuleCollapse = (index) => {
-    const updatedCollapseState = [...collapsedModules];
-    updatedCollapseState[index] = !updatedCollapseState[index];
-    setCollapsedModules(updatedCollapseState);
-  };
-
-  return (
-    <div className="max-w-3xl mx-auto p-8 bg-white border rounded-lg shadow-lg mt-10">
-      <h2 className="text-2xl font-semibold text-gray-700">{course?.name}</h2>
-      <p className="text-sm text-gray-600">Progress: {course?.progress.toFixed(0)}%</p>
-      <div className="bg-gray-200 rounded-full h-2.5 mt-1">
-        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${course?.progress}%` }}></div>
-      </div>
-      <h3 className="mt-4 font-semibold">Modules</h3>
-
-
-      <div className="mt-4">
-        <input
-          type="text"
-          placeholder="New Module Title"
-          value={newModuleTitle}
-          onChange={(e) => setNewModuleTitle(e.target.value)}
-          className="border rounded p-2 w-full"
-        />
-        <button onClick={addModule} className="bg-blue-500 text-white rounded px-4 py-2 mt-2">
-          Add Module
-        </button>
-      </div>
-
-      <ul className="divide-y divide-gray-200 mt-2">
-        {course?.modules.map((module, moduleIndex) => (
-          <li key={moduleIndex} className="py-2">
-            <div className="flex justify-between items-center">
-              <h4 className="font-semibold cursor-pointer" onClick={() => toggleModuleCollapse(moduleIndex)}>
-                {module.title} {collapsedModules[moduleIndex] ? '▼' : '▲'}
-              </h4>
+            <div className="mt-4">
+                <h3 className="text-lg font-semibold text-gray-700">Course Progress</h3>
+                <div className="w-full bg-gray-300 h-2 mt-2">
+                    <div className="bg-blue-500 h-2" style={{ width: `${calculateCourseProgress()}%` }} />
+                </div>
+                <p className="text-gray-600 mt-1">Progress: {calculateCourseProgress()}%</p>
             </div>
-            {!collapsedModules[moduleIndex] && (
-              <ul className="pl-4">
-                {module.topics.map((topic, topicIndex) => (
-                  <li key={topicIndex} className="py-1 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={topic.completed}
-                      onChange={() => handleTopicCompletion(moduleIndex, topicIndex)}
-                      className="mr-2"
-                    />
-                    <span className={`${topic.completed ? 'line-through text-gray-400' : ''}`}>{topic.title}</span>
-                  </li>
-                ))}
 
-                {activeModuleIndex === moduleIndex ? (
-                  <div className="mt-2">
+            <div className="mt-6">
+                <h3 className="text-lg font-semibold text-gray-700">Add Module</h3>
+                <div className="flex items-center space-x-2">
                     <input
-                      type="text"
-                      placeholder="New Topic Title"
-                      value={newTopicTitle}
-                      onChange={(e) => setNewTopicTitle(e.target.value)}
-                      className="border rounded p-2 w-full"
+                        type="text"
+                        value={newModuleName}
+                        onChange={(e) => setNewModuleName(e.target.value)}
+                        placeholder="New Module Name"
+                        className="border p-2 w-full"
                     />
-                    <button onClick={() => addTopic(moduleIndex)} className="bg-blue-500 text-white rounded px-4 py-2 mt-2">
-                      Add Topic
+                    <button
+                        onClick={handleAddModule}
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                        Add
                     </button>
-                  </div>
-                ) : (
-                  <button onClick={() => setActiveModuleIndex(moduleIndex)} className="text-blue-500 mt-2">
-                    Add Topic
-                  </button>
-                )}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+                </div>
+            </div>
+
+            <h3 className="text-lg font-semibold text-gray-700 mt-6">Modules</h3>
+            <ul className="divide-y divide-gray-200 mt-2">
+                {course.modules.map((module) => {
+                    const moduleProgress = getModuleProgress(module);
+
+                    return (
+                        <li key={module._id} className="py-4">
+                            <div className="mb-2">
+                                <div className="w-full bg-gray-300 h-2">
+                                    <div
+                                        className="bg-blue-500 h-2"
+                                        style={{ width: `${moduleProgress}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-2xl text-blue-700">{module.title}</span>
+                                <button
+                                    onClick={() => handleDeleteModule(module._id)}
+                                    className="text-red-500 hover:underline"
+                                >
+                                    Delete Module
+                                </button>
+                            </div>
+
+                            <div className="mt-4">
+                                <button
+                                    onClick={() => toggleDropdown(module._id)}
+                                    className="text-blue-500 hover:underline flex items-center"
+                                >
+                                    {expandedModules[module._id] ? (
+                                        <>
+                                            <FaChevronUp /> Hide Topics
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaChevronDown /> Show Topics
+                                        </>
+                                    )}
+                                </button>
+
+                                {expandedModules[module._id] && (
+                                    <div className="mt-2">
+                                        <h4 className="text-lg font-semibold    ">Topics</h4>
+                                        {module.topics.length === 0 && <p>No topics yet</p>}
+                                        <ul className="mt-2">
+                                            {module.topics.map((topic) => (
+                                                <li key={topic._id} className="flex justify-between items-center py-2">
+                                                    <div className="flex items-center space-x-2">
+                                                        <label className="flex items-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={topic.completed}
+                                                                onChange={() => handleMarkTopicComplete(module._id, topic._id)}
+                                                                className="mr-2"
+                                                            />
+                                                            <span className={`text-sm ${topic.completed ? 'line-through' : ''}`}>
+                                                                {topic.title}
+                                                            </span>
+                                                        </label>
+
+                                                        <button
+                                                            onClick={() => handleDeleteTopic(module._id, topic._id)}
+                                                            className="text-red-500 hover:underline"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        <div className="mt-4 flex items-center space-x-2">
+                                            <input
+                                                type="text"
+                                                value={newTopicNames[module._id] || ''}
+                                                onChange={(e) => handleTopicInputChange(module._id, e.target.value)}
+                                                placeholder="New Topic Name"
+                                                className="border p-2 w-full"
+                                            />
+                                            <button
+                                                onClick={() => handleAddTopic(module._id)}
+                                                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                                            >
+                                                Add Topic
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </li>
+                    );
+                })}
+            </ul>
+        </div>
+    );
 };
 
 export default CourseDetail;

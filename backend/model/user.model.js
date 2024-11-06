@@ -18,12 +18,12 @@ const UserSchema = new mongoose.Schema(
     },
     auraPoints: {
       type: Number,
-      default: 0, // Set default to 0 for new users
+      default: 0,
     },
     enrolledCourse: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Course", // Assuming there is a Course model
+        ref: "Course",
       },
     ],
   },

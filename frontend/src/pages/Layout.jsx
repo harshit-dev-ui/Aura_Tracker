@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { Outlet, useNavigate, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth } from "../redux/slices/auth/apiService"; // Adjust this import based on your setup
+import { checkAuth } from "../redux/slices/auth/apiService";
 
 function Layout() {
   const dispatch = useDispatch();
@@ -10,7 +10,6 @@ function Layout() {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
 
   useEffect(() => {
-    // Dispatch the checkAuth action on component mount
     const verifyAuth = async () => {
       const isAuthValid = await dispatch(checkAuth());
       if (!isAuthValid) {

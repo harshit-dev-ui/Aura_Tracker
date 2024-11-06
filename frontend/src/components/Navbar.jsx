@@ -5,13 +5,15 @@ import { CiLogout } from "react-icons/ci";
 import { logOut } from "../redux/slices/auth/userSlice";
 import { logoutUser } from "../redux/slices/auth/apiService";
 import { useDispatch } from "react-redux";
+
 function Navbar() {
-  // const [isAuthenticated, setisAuthenticatedTrue] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleClick = () => {
     navigate("/mentor");
   };
+
   const handleLogout = async () => {
     try {
       const response = await logoutUser();
@@ -22,43 +24,52 @@ function Navbar() {
       console.error("Error during logout:", error);
     }
   };
-  return (
-    <div className="flex items-center justify-between bg-gray-400 h-14 w-full px-3">
-      <div className="bg-red-400">LOGO</div>
-      {/* Navbar buttons */}
-      <div className="flex gap-6">
-        <button className="text-white hover:text-gray-300">Dashboard</button>
-        <button className="text-white hover:text-gray-300">Courses</button>
-        <button className="text-white hover:text-gray-300">Goals</button>
-        <button className="text-white hover:text-gray-300">LeaderBoard</button>
-        <button className="text-white hover:text-gray-300">Rewards</button>
-      </div>
-      {/* {isAuthenticated ? ( */}
 
-      <div className="flex gap-3">
-        <button className="text-[35px]" onClick={handleLogout}>
+  return (
+    <div className="flex items-center justify-between bg-gray-800 h-14 w-full px-6 py-2">
+      {/* Logo */}
+      <div className="text-white font-bold text-xl">LOGO</div>
+
+      {/* Navbar buttons */}
+      <div className="hidden md:flex gap-6">
+        <button className="text-white hover:text-gray-300 transition duration-200">Dashboard</button>
+        <button className="text-white hover:text-gray-300 transition duration-200">Courses</button>
+        <button className="text-white hover:text-gray-300 transition duration-200">Goals</button>
+        <button className="text-white hover:text-gray-300 transition duration-200">LeaderBoard</button>
+        <button className="text-white hover:text-gray-300 transition duration-200">Rewards</button>
+      </div>
+
+      {/* User icons and Logout button */}
+      <div className="flex gap-3 items-center">
+        <button
+          className="text-white text-3xl hover:text-gray-300 transition duration-200"
+          onClick={handleLogout}
+        >
           <CiLogout />
         </button>
-        <button className="text-[35px]" onClick={handleClick}>
+        <button
+          className="text-white text-3xl hover:text-gray-300 transition duration-200"
+          onClick={handleClick}
+        >
           <FaUserCircle />
         </button>
       </div>
-      {/* ) : (
-        <div className="flex gap-3">
-          <button
-            className="text-blue-600 p-2 border border-white rounded-lg bg-white hover:text-gray-300 "
-            onClick={navigate("/login")}
-          >
-            Login
-          </button>
-          <button
-            className="text-white p-2 border border-blue-600 rounded-lg bg-blue-600 hover:text-gray-300"
-            onClick={navigate("/signup")}
-          >
-            Signup
-          </button>
-        </div>
-      )} */}
+
+      {/* Mobile Menu Button (hidden on large screens) */}
+      <div className="md:hidden flex gap-3">
+        <button
+          className="text-white text-xl hover:text-gray-300 transition duration-200"
+          onClick={handleLogout}
+        >
+          <CiLogout />
+        </button>
+        <button
+          className="text-white text-xl hover:text-gray-300 transition duration-200"
+          onClick={handleClick}
+        >
+          <FaUserCircle />
+        </button>
+      </div>
     </div>
   );
 }
