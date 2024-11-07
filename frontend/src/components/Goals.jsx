@@ -1,77 +1,127 @@
+// src/components/Goals.jsx
 import React, { useState, useEffect } from "react";
+import {
+  getGoals,
+  addGoal,
+  updateGoal,
+  deleteGoal,
+} from "../redux/slices/goals/apiService";
+import { MdDeleteOutline } from "react-icons/md";
+import { FaRegEdit } from "react-icons/fa";
 
 function Goals() {
-  const [goals, setGoals] = useState([]); // State to hold the goals
-  const [showDialog, setShowDialog] = useState(false); // State to control dialog visibility
+  const [goals, setGoals] = useState([]);
+  const [showDialog, setShowDialog] = useState(false);
   const [newGoal, setNewGoal] = useState({
+    id: null,
     title: "",
     deadline: "",
     priority: "low",
     isCompleted: false,
+    type: "Personal Task",
   });
+  const [editGoalId, setEditGoalId] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
-  // Helper function to clear the time portion of a Date object
-  const clearTime = (date) => {
-    date.setHours(0, 0, 0, 0);
-    return date;
-  };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  // Get today's date with time cleared
-  const today = clearTime(new Date());
-
-  // Function to handle adding a new goal
-  const addGoal = () => {
-    if (newGoal.title && newGoal.deadline) {
-      setGoals((prevGoals) => [...prevGoals, newGoal]);
-      setNewGoal({
-        title: "",
-        deadline: "",
-        priority: "low",
-        isCompleted: false,
-      });
-      setShowDialog(false);
+  const fetchGoals = async () => {
+    try {
+      const goalsData = await getGoals();
+      const validGoals = goalsData.map((goal) => ({
+        ...goal,
+        id: goal._id,
+      }));
+      setGoals(validGoals);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
     }
   };
 
-  // Mark a goal as completed
-  const toggleCompletion = (index) => {
-    setGoals((prevGoals) =>
-      prevGoals.map((goal, i) =>
-        i === index ? { ...goal, isCompleted: !goal.isCompleted } : goal
-      )
-    );
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
+  const handleSaveGoal = async () => {
+    if (newGoal.title && newGoal.deadline) {
+      try {
+        if (newGoal.id) {
+          const updatedGoal = await updateGoal(newGoal.id, newGoal);
+          setGoals((prevGoals) =>
+            prevGoals.map((goal) =>
+              goal.id === newGoal.id ? updatedGoal : goal
+            )
+          );
+          setEditGoalId(null);
+        } else {
+          const { id, ...goalDataWithoutId } = newGoal;
+          const newGoalData = await addGoal(goalDataWithoutId);
+          setGoals((prevGoals) => [...prevGoals, newGoalData]);
+        }
+        await fetchGoals();
+        setNewGoal({
+          id: null,
+          title: "",
+          deadline: "",
+          priority: "low",
+          isCompleted: false,
+          type: "Personal Task",
+        });
+        setShowDialog(false);
+      } catch (error) {
+        console.error("Error saving goal:", error);
+      }
+    }
   };
 
-  // Remove completed goals with today's deadline at the end of the day
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  const handleToggleCompletion = async (goalId, currentStatus) => {
+    try {
+      const updatedGoal = { isCompleted: !currentStatus };
+      const updatedGoalData = await updateGoal(goalId, updatedGoal);
       setGoals((prevGoals) =>
-        prevGoals.filter(
-          (goal) =>
-            goal.deadline !== today.toISOString().split("T")[0] ||
-            !goal.isCompleted
+        prevGoals.map((goal) =>
+          goal.id === goalId ? { ...updatedGoalData, id: goal.id } : goal
         )
       );
-    }, 24 * 60 * 60 * 1000); // Run this every 24 hours
+    } catch (error) {
+      console.error("Error updating goal completion:", error);
+    }
+  };
 
-    return () => clearTimeout(timer); // Cleanup timer on component unmount
-  }, [goals, today]);
+  const handleEditGoal = (goal) => {
+    setEditGoalId(goal.id);
+    setNewGoal({
+      id: goal.id,
+      title: goal.title,
+      deadline: goal.deadline,
+      priority: goal.priority,
+      isCompleted: goal.isCompleted,
+      type: goal.type,
+    });
+    setShowDialog(true);
+  };
 
-  const todaysGoals = goals.filter((goal) => {
-    const goalDate = clearTime(new Date(goal.deadline));
-    return goalDate.getTime() === today.getTime();
+  const handleDeleteGoal = async (goalId) => {
+    try {
+      await deleteGoal(goalId);
+      setGoals(goals.filter((goal) => goal.id !== goalId));
+      setDeleteConfirmation(null);
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+    }
+  };
+
+  const displayableGoals = goals.filter((goal) => {
+    const goalDate = new Date(goal.deadline);
+    goalDate.setHours(0, 0, 0, 0);
+    return goalDate.getTime() == today.getTime();
   });
 
-  const futureGoals = goals.filter((goal) => {
-    const goalDate = clearTime(new Date(goal.deadline));
-    return goalDate.getTime() > today.getTime();
-  });
-
-  // Function to determine background color based on priority
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "high":
-        return "bg-red-600";
+        return "bg-red-500";
       case "medium":
         return "bg-yellow-500";
       default:
@@ -80,75 +130,87 @@ function Goals() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <h1 className="text-2xl font-bold">Goals</h1>
-      <div className="bg-gray-100 w-[400px] px-2 flex flex-col items-center py-4">
-        <h2 className="text-lg font-semibold">Today's Goals</h2>
-        <div className="w-full max-h-48 overflow-y-auto">
-          {todaysGoals.length === 0 ? (
-            <p className="text-center text-gray-600">No goals for today.</p>
-          ) : (
-            todaysGoals.map((goal, index) => (
-              <div
-                key={index}
-                className={`${getPriorityColor(
-                  goal.priority
-                )} text-white p-2 m-2 rounded flex items-center ${
-                  goal.isCompleted ? "line-through opacity-50" : ""
-                }`}
-              >
+    <div className="flex flex-col items-center gap-2 p-8">
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Goals</h1>
+
+      <h2 className="text-2xl font-semibold text-gray-700 mb-1">
+        Today's Goals
+      </h2>
+
+      <div className="w-[400px] bg-white max-h-[400px] overflow-y-auto mt-6 shadow-lg rounded-lg p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        {displayableGoals.map((goal) => (
+          <div
+            key={goal.id}
+            className={`${getPriorityColor(
+              goal.priority
+            )} text-white p-4 m-2 rounded-lg shadow-md`}
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-semibold text-lg">{goal.title}</h3>
+                <p className="text-sm">
+                  Deadline: {new Date(goal.deadline).toLocaleDateString()}
+                </p>
+                <p className="text-sm">Priority: {goal.priority}</p>
+                <p className="text-sm">Type: {goal.type}</p>
+              </div>
+              <div className="flex gap-1 items-center space-x-3">
                 <input
                   type="checkbox"
                   checked={goal.isCompleted}
-                  onChange={() => toggleCompletion(index)}
-                  className="mr-2"
+                  onChange={() =>
+                    handleToggleCompletion(goal.id, goal.isCompleted)
+                  }
+                  className="w-5 h-5 rounded-full border-gray-400 checked:bg-green-500"
                 />
-                <div>
-                  <h3 className="font-semibold">{goal.title}</h3>
-                  <p>Deadline: {goal.deadline}</p>
-                  <p>Priority: {goal.priority}</p>
-                </div>
+                <button
+                  onClick={() => handleEditGoal(goal)}
+                  className="text-blue-300 hover:text-blue-500 text-2xl"
+                >
+                  <FaRegEdit />
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmation(goal.id)}
+                  className="text-black hover:text-red-600 text-2xl"
+                >
+                  <MdDeleteOutline />
+                </button>
               </div>
-            ))
-          )}
-        </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="bg-gray-100 w-full px-2 flex flex-col items-center py-4 mt-4">
-        <h2 className="text-lg font-semibold">Future Goals</h2>
-        <div className="w-full">
-          {futureGoals.length === 0 ? (
-            <p className="text-center text-gray-600">No future goals set.</p>
-          ) : (
-            futureGoals.map((goal, index) => (
-              <div
-                key={index}
-                className={`${getPriorityColor(
-                  goal.priority
-                )} text-white p-2 m-2 rounded`}
+      {deleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
+            <p>Are you sure you want to delete this goal?</p>
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={() => handleDeleteGoal(deleteConfirmation)}
+                className="bg-red-500 text-white px-4 py-2 rounded"
               >
-                <h3 className="font-semibold">{goal.title}</h3>
-                <p>Deadline: {goal.deadline}</p>
-                <p>Priority: {goal.priority}</p>
-              </div>
-            ))
-          )}
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setDeleteConfirmation(null)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      <button
-        onClick={() => setShowDialog(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
-      >
-        Add New Goal
-      </button>
-
-      {/* Dialog for creating new goal */}
       {showDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-lg font-semibold">Create New Goal</h2>
-            <div className="mt-4">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h2 className="text-xl font-semibold mb-4">
+              {editGoalId ? "Edit Goal" : "Create New Goal"}
+            </h2>
+            <div className="space-y-4">
               <input
                 type="text"
                 placeholder="Goal Title"
@@ -156,7 +218,7 @@ function Goals() {
                 onChange={(e) =>
                   setNewGoal({ ...newGoal, title: e.target.value })
                 }
-                className="border border-gray-300 p-2 rounded w-full mb-2"
+                className="border border-gray-300 p-2 rounded w-full"
               />
               <input
                 type="date"
@@ -164,37 +226,54 @@ function Goals() {
                 onChange={(e) =>
                   setNewGoal({ ...newGoal, deadline: e.target.value })
                 }
-                className="border border-gray-300 p-2 rounded w-full mb-2"
+                className="border border-gray-300 p-2 rounded w-full"
               />
               <select
                 value={newGoal.priority}
                 onChange={(e) =>
                   setNewGoal({ ...newGoal, priority: e.target.value })
                 }
-                className="border border-gray-300 p-2 rounded w-full mb-4"
+                className="border border-gray-300 p-2 rounded w-full"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
-              <div className="flex justify-between">
-                <button
-                  onClick={addGoal}
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                >
-                  Add Goal
-                </button>
-                <button
-                  onClick={() => setShowDialog(false)}
-                  className="bg-red-500 text-white px-4 py-2 rounded"
-                >
-                  Cancel
-                </button>
-              </div>
+              <select
+                value={newGoal.type}
+                onChange={(e) =>
+                  setNewGoal({ ...newGoal, type: e.target.value })
+                }
+                className="border border-gray-300 p-2 rounded w-full"
+              >
+                <option value="Personal Task">Personal Task</option>
+                <option value="Course Assignment">Course Assignment</option>
+              </select>
+            </div>
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={handleSaveGoal}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setShowDialog(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      <button
+        onClick={() => setShowDialog(true)}
+        className="bg-blue-500 text-white px-4 py-2 rounded mt-6 shadow-lg"
+      >
+        Add New Goal
+      </button>
     </div>
   );
 }

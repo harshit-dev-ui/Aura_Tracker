@@ -26,6 +26,12 @@ const UserSchema = new mongoose.Schema(
         ref: "Course", // Assuming there is a Course model
       },
     ],
+    allGoals: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Goal",
+      },
+    ],
   },
   { timestamps: true }
 );
