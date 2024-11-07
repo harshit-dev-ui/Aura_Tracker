@@ -26,6 +26,12 @@ const UserSchema = new mongoose.Schema(
         ref: "Course",
       },
     ],
+    allGoals: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Goal",
+      },
+    ],
   },
   { timestamps: true }
 );

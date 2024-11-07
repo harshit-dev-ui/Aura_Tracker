@@ -4,10 +4,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import courseRoutes from "./routes/course.routes.js"; 
+import courseRoutes from "./routes/course.routes.js";
 import cookieParser from "cookie-parser";
-
-
+import goalRoutes from "./routes/goals.routes.js";
 dotenv.config();
 
 const app = express();
@@ -30,12 +29,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/courses", courseRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+app.use("/api/goals", goalRoutes);
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
-
-
