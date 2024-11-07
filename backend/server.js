@@ -31,6 +31,7 @@ app.use("/api/courses", courseRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 app.use("/api/goals", goalRoutes);
 mongoose
   .connect(process.env.MONGODB_URI)

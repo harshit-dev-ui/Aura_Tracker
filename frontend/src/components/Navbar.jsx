@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
 import { logOut } from "../redux/slices/auth/userSlice";
 import { logoutUser } from "../redux/slices/auth/apiService";
 import { useDispatch } from "react-redux";
+import { getUserAuraPoints } from "../utils/getuserAuraPoints";
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [auraPoints, setAuraPoints] = useState(0);
+
+  useEffect(() => {
+    async function fetchAuraPoints() {
+      try {
+        const points = await getUserAuraPoints(); 
+        setAuraPoints(points);
+      } catch (error) {
+        console.error("Failed to fetch aura points:", error);
+      }
+    }
+    fetchAuraPoints();
+  }, []);
 
   const handleClick = () => {
     navigate("/mentor");
@@ -39,19 +53,17 @@ function Navbar() {
         <button className="text-white hover:text-gray-300 transition duration-200">Rewards</button>
       </div>
 
-      {/* User icons and Logout button */}
       <div className="flex gap-3 items-center">
+        <div className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm">
+          {`Aura Points: ${auraPoints}`}
+        </div>
+
+        {/* Logout button */}
         <button
           className="text-white text-3xl hover:text-gray-300 transition duration-200"
           onClick={handleLogout}
         >
           <CiLogout />
-        </button>
-        <button
-          className="text-white text-3xl hover:text-gray-300 transition duration-200"
-          onClick={handleClick}
-        >
-          <FaUserCircle />
         </button>
       </div>
 
