@@ -15,7 +15,6 @@ export const createGoal = async (req, res) => {
     });
     await newGoal.save();
 
-    // Add the goal ID to the user's allGoals array
     await User.findByIdAndUpdate(userId, {
       $push: { allGoals: newGoal._id },
     });
@@ -31,7 +30,7 @@ export const getGoals = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId).populate("allGoals");
-    const goals = user.allGoals; // This will give you the list of goals
+    const goals = user.allGoals;
     res.status(200).json(goals);
   } catch (error) {
     console.error("Error fetching goals:", error);
@@ -42,18 +41,36 @@ export const getGoals = async (req, res) => {
 export const updateGoal = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id; // Get user ID from the authenticated request
+    const userId = req.user._id;
+    const { isCompleted } = req.body;
 
-    // Find and update the goal, only if it belongs to the user
-    const updatedGoal = await Goal.findOneAndUpdate(
-      { _id: id, createdBy: userId }, // Corrected field to createdBy
-      req.body,
-      { new: true }
-    );
+    const goal = await Goal.findOne({ _id: id, createdBy: userId });
 
-    if (!updatedGoal) {
+    if (!goal) {
       return res.status(404).json({ message: "Goal not found" });
     }
+
+    let pointsToAdjust = 0;
+    if (goal.type === "Personal Task") {
+      pointsToAdjust = 10;
+    } else if (goal.type === "Course Assignment") {
+      pointsToAdjust = 20;
+    }
+
+    if (goal.isCompleted !== isCompleted) {
+      if (isCompleted) {
+        await User.findByIdAndUpdate(userId, {
+          $inc: { auraPoints: pointsToAdjust },
+        });
+      } else {
+        await User.findByIdAndUpdate(userId, {
+          $inc: { auraPoints: -pointsToAdjust },
+        });
+      }
+    }
+    const updatedGoal = await Goal.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
 
     res.status(200).json(updatedGoal);
   } catch (error) {
@@ -65,16 +82,14 @@ export const updateGoal = async (req, res) => {
 export const deleteGoal = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id; // Get user ID from the authenticated request
+    const userId = req.user._id;
 
-    // Find and delete the goal only if it belongs to the user
     const goal = await Goal.findOneAndDelete({ _id: id, createdBy: userId });
 
     if (!goal) {
       return res.status(404).json({ message: "Goal not found" });
     }
 
-    // Remove the goal ID from the user's allGoals array
     await User.findByIdAndUpdate(userId, {
       $pull: { allGoals: id },
     });

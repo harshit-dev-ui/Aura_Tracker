@@ -23,6 +23,7 @@ export const login = async (req, res) => {
       _id: user._id,
       username: user.username,
       email: user.email,
+      auraPoints: user.auraPoints,
     });
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
@@ -55,6 +56,7 @@ export const signup = async (req, res) => {
       _id: user._id,
       username: user.username,
       email: user.email,
+      auraPoints: user.auraPoints,
     });
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
@@ -85,24 +87,34 @@ export const googleAuth = async (req, res) => {
       generateTokenAndSetCookie(user._id, res);
 
       return res.status(200).json({
-        user: { id: user._id, username: user.username, email: user.email },
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          auraPoints: user.auraPoints,
+        },
       });
     } else {
       user = await User.create({
         googleId: sub,
         username: name,
         email,
-        password:undefined,
+        password: undefined,
       });
 
       generateTokenAndSetCookie(user._id, res);
 
       return res.status(200).json({
-        user: { id: user._id, username: user.username, email: user.email },
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          auraPoints: user.auraPoints,
+        },
       });
     }
   } catch (err) {
-     console.error("Google Authentication Error:", err);
-     res.status(500).json({ msg: "Server error during Google Authentication" });
+    console.error("Google Authentication Error:", err);
+    res.status(500).json({ msg: "Server error during Google Authentication" });
   }
 };

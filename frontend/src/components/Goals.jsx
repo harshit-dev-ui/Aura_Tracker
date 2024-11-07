@@ -8,8 +8,11 @@ import {
 } from "../redux/slices/goals/apiService";
 import { MdDeleteOutline } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
-
+import { getUserAuraPoints } from "../utils/getuserAuraPoints";
+import { updateAuraPoints } from "../redux/slices/auth/userSlice";
+import { useDispatch } from "react-redux";
 function Goals() {
+  const dispatch = useDispatch();
   const [goals, setGoals] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [newGoal, setNewGoal] = useState({
@@ -25,6 +28,19 @@ function Goals() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  async function fetchAuraPoints() {
+    try {
+      const points = await getUserAuraPoints();
+      dispatch(updateAuraPoints(points));
+    } catch (error) {
+      console.error("Failed to fetch aura points:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchAuraPoints();
+  }, []);
 
   const fetchGoals = async () => {
     try {
@@ -84,6 +100,7 @@ function Goals() {
           goal.id === goalId ? { ...updatedGoalData, id: goal.id } : goal
         )
       );
+      await fetchAuraPoints();
     } catch (error) {
       console.error("Error updating goal completion:", error);
     }

@@ -4,28 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
 import { logOut } from "../redux/slices/auth/userSlice";
 import { logoutUser } from "../redux/slices/auth/apiService";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getUserAuraPoints } from "../utils/getuserAuraPoints";
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [auraPoints, setAuraPoints] = useState(0);
-
-  useEffect(() => {
-    async function fetchAuraPoints() {
-      try {
-        const points = await getUserAuraPoints(); 
-        setAuraPoints(points);
-      } catch (error) {
-        console.error("Failed to fetch aura points:", error);
-      }
-    }
-    fetchAuraPoints();
-  }, []);
+  let auraPoints = useSelector((state) => state.user.currentUser.auraPoints);
 
   const handleClick = () => {
-    navigate("/mentor");
+    navigate("/dashboard");
   };
 
   const handleLogout = async () => {
@@ -46,19 +34,28 @@ function Navbar() {
 
       {/* Navbar buttons */}
       <div className="hidden md:flex gap-6">
-        <button className="text-white hover:text-gray-300 transition duration-200">Dashboard</button>
-        <button className="text-white hover:text-gray-300 transition duration-200">Courses</button>
-        <button className="text-white hover:text-gray-300 transition duration-200">Goals</button>
-        <button className="text-white hover:text-gray-300 transition duration-200">LeaderBoard</button>
-        <button className="text-white hover:text-gray-300 transition duration-200">Rewards</button>
+        <button className="text-white hover:text-gray-300 transition duration-200">
+          Dashboard
+        </button>
+        <button className="text-white hover:text-gray-300 transition duration-200">
+          Courses
+        </button>
+        <button className="text-white hover:text-gray-300 transition duration-200">
+          Goals
+        </button>
+        <button className="text-white hover:text-gray-300 transition duration-200">
+          LeaderBoard
+        </button>
+        <button className="text-white hover:text-gray-300 transition duration-200">
+          Rewards
+        </button>
       </div>
 
       <div className="flex gap-3 items-center">
+        {/* Logout button */}
         <div className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold text-sm">
           {`Aura Points: ${auraPoints}`}
         </div>
-
-        {/* Logout button */}
         <button
           className="text-white text-3xl hover:text-gray-300 transition duration-200"
           onClick={handleLogout}
