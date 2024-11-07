@@ -26,13 +26,12 @@ app.use(express.json());
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/goals", goalRoutes);
 app.use("/api/courses", courseRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-app.use("/api/goals", goalRoutes);
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB connected"))

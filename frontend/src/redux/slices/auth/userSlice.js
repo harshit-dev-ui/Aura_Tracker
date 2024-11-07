@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import AuraPoints from "../../../components/AuraPoints";
 //to store current state into localStorage
 const loadState = () => {
   try {
@@ -82,6 +83,12 @@ export const userSlice = createSlice({
         saveState(state);
       }
     },
+    updateAuraPoints: (state, action) => {
+      if (state.currentUser) {
+        state.currentUser.auraPoints = action.payload;
+        saveState(state);
+      }
+    },
   },
 });
 
@@ -93,7 +100,7 @@ export const {
   signUpSuccess,
   signUpFailure,
   logOut,
-  updateAuraPoints
+  updateAuraPoints,
 } = userSlice.actions;
 
 export default userSlice.reducer;
