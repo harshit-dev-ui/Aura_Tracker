@@ -1,17 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCourseById, addModule, deleteModule, addTopic, deleteTopic, completeTopic, deleteCourse } from '../utils/courseService';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa'; // For dropdown icons
-
+import {  getCourseById, addModule, deleteModule, addTopic, deleteTopic, completeTopic, deleteCourse } from '../utils/courseService';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa'; 
+import { getUserAuraPoints } from '../utils/getuserAuraPoints';
+import { useDispatch ,useSelector} from 'react-redux';
+import { updateAuraPoints } from '../redux/slices/auth/userSlice';
 const CourseDetail = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
+    const dispatch=useDispatch();
     const [course, setCourse] = useState(null);
     const [newModuleName, setNewModuleName] = useState('');
     const [newTopicNames, setNewTopicNames] = useState({});
-    const [expandedModules, setExpandedModules] = useState({}); // Used for showing dropdown menu
+    const [expandedModules, setExpandedModules] = useState({});
 
-    useEffect(() => {
+    let auraPoints=useSelector((state)=>state.user.currentUser.auraPoints)
+
+    async function fetchAuraPoints() {
+
+        try {
+          const points = await getUserAuraPoints(); 
+          dispatch(updateAuraPoints((points)));
+        } catch (error) {
+          console.error("Failed to fetch aura points:", error);
+        }
+      }
+        useEffect(() => {
+            fetchAuraPoints();
+      }, []);
+
+      useEffect(() => {
         const fetchCourse = async () => {
             try {
                 const data = await getCourseById(courseId);
@@ -31,12 +49,26 @@ const CourseDetail = () => {
     }, [courseId, newModuleName, newTopicNames]);
 
     const calculateCourseProgress = () => {
-        if (!course) return 0;
-        const totalTopics = course.modules.reduce((sum, module) => sum + (module.topics.length), 0);
-        const completedTopics = course.modules.reduce((sum, module) => sum + (module.topics.filter(topic => topic.completed).length), 0);
+        if (!course || !Array.isArray(course.modules)) return 0;  
+      
+        const totalTopics = course.modules.reduce((sum, module) => {
+          if (module.topics && Array.isArray(module.topics)) {
+            return sum + module.topics.length;  
+          }
+          return sum;
+        }, 0);
+      
+        const completedTopics = course.modules.reduce((sum, module) => {
+          if (module.topics && Array.isArray(module.topics)) {
+            return sum + module.topics.filter(topic => topic.completed).length;  
+          }
+          return sum;
+        }, 0);
+      
+        // Return the progress percentage, rounded, or 0 if no topics
         return totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
-    };
-
+      };
+      
     const handleAddModule = async () => {
         try {
             if (!newModuleName) throw new Error('Please enter Module Name');
@@ -61,6 +93,7 @@ const CourseDetail = () => {
             console.error(error.message);
             alert(error.message);
         }
+        await fetchAuraPoints();
     };
 
     const handleAddTopic = async (moduleId) => {
@@ -76,6 +109,7 @@ const CourseDetail = () => {
                 ),
             }));
             setNewTopicNames(prevNames => ({ ...prevNames, [moduleId]: '' }));
+            await fetchAuraPoints();
         } catch (error) {
             console.error(error.message);
             alert(error.message);
@@ -117,6 +151,7 @@ const CourseDetail = () => {
                         : module
                 ),
             }));
+            await fetchAuraPoints();
         } catch (error) {
             console.error(error.message);
             alert(error.message);
@@ -166,6 +201,10 @@ const CourseDetail = () => {
                 >
                     Delete Course
                 </button>
+            </div>
+
+            <div className="absolute top-4  right-40 bg-blue-500 text-white px-4 py-2 rounded-full">
+                Aura Points: {auraPoints}
             </div>
 
             {/* Course Heading and Delete Button */}
@@ -223,79 +262,66 @@ const CourseDetail = () => {
 
                             {/* Module Title and Delete Button */}
                             <div className="flex justify-between items-center">
-                                <span className="font-semibold text-2xl text-blue-700">{module.title}</span>
+                                <div className="flex items-center space-x-2">
+                                    <button
+                                        onClick={() => toggleDropdown(module._id)}
+                                        className="text-gray-600 hover:text-gray-800"
+                                    >
+                                        {expandedModules[module._id] ? <FaChevronUp /> : <FaChevronDown />}
+                                    </button>
+                                    <h4 className="text-xl font-semibold text-gray-700">{module.title}</h4>
+                                </div>
                                 <button
                                     onClick={() => handleDeleteModule(module._id)}
-                                    className="text-red-500 hover:underline"
+                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                                 >
                                     Delete Module
                                 </button>
                             </div>
 
-                            {/* Dropdown to Show/Hide Topics */}
-                            <div className="mt-4">
-                                <button
-                                    onClick={() => toggleDropdown(module._id)}
-                                    className="text-blue-500 hover:underline flex items-center"
-                                >
-                                    {expandedModules[module._id] ? (
-                                        <FaChevronUp /> 
-                                    ) : (
-                                        <FaChevronDown />
-                                    )}
-                                    {expandedModules[module._id] ? ' Hide Topics' : ' Show Topics'}
-                                </button>
-
-                                {/* Topics Section */}
-                                {expandedModules[module._id] && (
-                                    <div className="mt-2">
-                                        <h4 className="text-lg font-semibold">Topics</h4>
-                                        {module.topics.length === 0 && <p>No topics yet</p>}
-                                        <ul className="mt-2">
-                                            {module.topics.map((topic) => (
-                                                <li key={topic._id} className="flex justify-between items-center py-2">
-                                                    <div className="flex items-center space-x-2">
-                                                        <label className="flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={topic.completed}
-                                                                onChange={() => handleMarkTopicComplete(module._id, topic._id)}
-                                                                className="mr-2"
-                                                            />
-                                                            <span className={`text-sm ${topic.completed ? 'line-through' : ''}`}>
-                                                                {topic.title}
-                                                            </span>
-                                                        </label>
-
-                                                        <button
-                                                            onClick={() => handleDeleteTopic(module._id, topic._id)}
-                                                            className="text-red-500 hover:underline"
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-
-                                        <div className="mt-4 flex items-center space-x-2">
-                                            <input
-                                                type="text"
-                                                value={newTopicNames[module._id] || ''}
-                                                onChange={(e) => handleTopicInputChange(module._id, e.target.value)}
-                                                placeholder="New Topic Name"
-                                                className="border p-2 w-full"
-                                            />
-                                            <button
-                                                onClick={() => handleAddTopic(module._id)}
-                                                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                                            >
-                                                Add Topic
-                                            </button>
-                                        </div>
+                            {/* Dropdown for Topics */}
+                            {expandedModules[module._id] && (
+                                <div className="mt-4">
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="text"
+                                            value={newTopicNames[module._id] || ''}
+                                            onChange={(e) => handleTopicInputChange(module._id, e.target.value)}
+                                            placeholder="New Topic Name"
+                                            className="border p-2 w-full"
+                                        />
+                                        <button
+                                            onClick={() => handleAddTopic(module._id)}
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                        >
+                                            Add Topic
+                                        </button>
                                     </div>
-                                )}
-                            </div>
+                                    <ul className="mt-4">
+                                        {module.topics.map((topic) => (
+                                            <li key={topic._id} className="flex justify-between items-center py-2">
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={topic.completed}
+                                                        onChange={() => handleMarkTopicComplete(module._id, topic._id)}
+                                                        className="form-checkbox"
+                                                    />
+                                                    <span className={topic.completed ? 'line-through text-gray-500' : ''}>
+                                                        {topic.title}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteTopic(module._id, topic._id)}
+                                                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                                                >
+                                                    Delete Topic
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </li>
                     );
                 })}
