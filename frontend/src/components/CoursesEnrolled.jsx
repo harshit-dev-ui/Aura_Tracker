@@ -23,6 +23,7 @@ const CoursesEnrolled = () => {
     const fetchCourses = async () => {
       try {
         const data = await getCourses();
+        console.log(data);
         setCourses(data);
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -48,7 +49,7 @@ const CoursesEnrolled = () => {
 
       const createdCourse = await createCourse(newCourse, user._id);
       setCourses([...courses, createdCourse]);
-      setIsModalOpen(false); // Close modal
+      setIsModalOpen(false); 
       setNewCourseName("");
       setNewCourseDescription("");
     } catch (error) {
@@ -79,7 +80,7 @@ const CoursesEnrolled = () => {
               </h3>
 
               <p className="text-sm text-gray-600">
-                Progress: {course.progress}%
+                Progress: {Math.round(course.progress)}%
               </p>
             </div>
           </li>
@@ -88,7 +89,7 @@ const CoursesEnrolled = () => {
 
       <div className="mt-6 text-center">
         <button
-          onClick={() => setIsModalOpen(true)} // Open modal when clicking "Add Course"
+          onClick={() => setIsModalOpen(true)} 
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           Add Course
@@ -126,7 +127,7 @@ const CoursesEnrolled = () => {
                 Add Course
               </button>
               <button
-                onClick={() => setIsModalOpen(false)} // Close modal
+                onClick={() => setIsModalOpen(false)}
                 className="ml-2 px-4 py-2 bg-gray-300 text-black rounded-lg hover:bg-gray-400"
               >
                 Cancel

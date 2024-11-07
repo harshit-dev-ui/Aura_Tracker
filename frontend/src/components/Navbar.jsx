@@ -4,28 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
 import { logOut } from "../redux/slices/auth/userSlice";
 import { logoutUser } from "../redux/slices/auth/apiService";
-import { useDispatch } from "react-redux";
-import { getUserAuraPoints } from "../utils/getuserAuraPoints";
+import { useDispatch, useSelector } from "react-redux";
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [auraPoints, setAuraPoints] = useState(0);
-
-  useEffect(() => {
-    async function fetchAuraPoints() {
-      try {
-        const points = await getUserAuraPoints(); 
-        setAuraPoints(points);
-      } catch (error) {
-        console.error("Failed to fetch aura points:", error);
-      }
-    }
-    fetchAuraPoints();
-  }, []);
-
+  let auraPoints=useSelector((state)=>state.user.currentUser.auraPoints)
   const handleClick = () => {
-    navigate("/mentor");
+    navigate("/dashboard");
   };
 
   const handleLogout = async () => {
