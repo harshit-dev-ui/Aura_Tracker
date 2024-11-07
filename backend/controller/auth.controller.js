@@ -92,6 +92,7 @@ export const googleAuth = async (req, res) => {
         googleId: sub,
         username: name,
         email,
+        password:undefined,
       });
 
       generateTokenAndSetCookie(user._id, res);
@@ -101,6 +102,7 @@ export const googleAuth = async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(500).json({ msg: "Server error" });
+     console.error("Google Authentication Error:", err);
+     res.status(500).json({ msg: "Server error during Google Authentication" });
   }
 };

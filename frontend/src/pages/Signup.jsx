@@ -46,19 +46,31 @@ const Signup = () => {
       console.log(`Signup failed: ${error}`);
     }
   };
+
+
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      await handleGoogleSignIn(credentialResponse.credential);
-      navigate("/dashboard");
+ 
+      console.log("Google Sign-In Success:", credentialResponse);
+  
+      if (credentialResponse?.credential) {
+        console.log("Google Token:", credentialResponse.credential);
+  
+        await handleGoogleSignIn(credentialResponse.credential, dispatch);
+        navigate("/dashboard");
+      } else {
+        console.error("Credential not found in Google response.");
+      }
     } catch (error) {
       console.error("Google sign-in error:", error.message);
     }
   };
-
+  
   const handleGoogleFailure = (error) => {
-    console.error("Google Sign In was unsuccessful. Try again later");
+    console.error("Google Sign In was unsuccessful. Try again later", error);
     console.log(error);
   };
+  
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <div className="flex items-center justify-center min-h-screen bg-gray-100">

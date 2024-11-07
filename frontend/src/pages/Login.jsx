@@ -10,13 +10,7 @@ import {
 import { loginUser, handleGoogleSignIn } from "../redux/slices/auth/apiService";
 import { store } from "../redux/store";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-const apiClient = axios.create({
-  baseURL: "http://localhost:5000",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -32,6 +26,7 @@ const Login = () => {
       navigate("/");
     }
   }, [navigate, currentUser]);
+
   const onSubmit = async (data) => {
     dispatch(loginInStart());
     try {
@@ -49,7 +44,7 @@ const Login = () => {
   };
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      await handleGoogleSignIn(credentialResponse.credential);
+      await handleGoogleSignIn(credentialResponse.credential,dispatch);
       navigate("/dashboard");
     } catch (error) {
       console.error("Google sign-in error:", error.message);

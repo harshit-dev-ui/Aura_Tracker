@@ -1,6 +1,5 @@
 import axios from "axios";
 import { loginInSuccess } from "./userSlice";
-import { useDispatch } from "react-redux";
 
 // Instance of Axios with default settings
 const apiClient = axios.create({
@@ -59,15 +58,14 @@ export const logoutUser = async () => {
     throw error;
   }
 };
-export const handleGoogleSignIn = async (tokenId) => {
-  // const dispatch = useDispatch()
+export const handleGoogleSignIn = async (tokenId,dispatch) => {
   try {
     const res = await apiClient.post(
       "/api/auth/oAuth2",
       { tokenId },
       { withCredentials: true }
     );
-    // dispatch(loginInSuccess(res));
+     dispatch(loginInSuccess(res.data));
   } catch (err) {
     console.error(
       "Error during Google sign-in:",
