@@ -24,15 +24,13 @@ function Layout() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-screen">
       <div className="sticky top-0 z-50">
         <Navbar />
       </div>
-      <div className="p-1">
-        <div className="h-screen ">
-          {/* here all the children of layout displays */}
-          <Outlet />
-        </div>
+      <div className="flex-grow p-1 overflow-hidden">
+        {/* here all the children of layout display without scroll */}
+        <Outlet />
       </div>
     </div>
   );

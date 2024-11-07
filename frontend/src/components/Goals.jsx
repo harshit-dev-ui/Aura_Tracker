@@ -130,12 +130,8 @@ function Goals() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 p-8">
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Goals</h1>
-
-      <h2 className="text-2xl font-semibold text-gray-700 mb-1">
-        Today's Goals
-      </h2>
+    <div className="flex flex-col items-center gap-1 p-2">
+      <h2 className="text-2xl font-semibold text-gray-700 ">Today's Goals</h2>
 
       <div className="w-[400px] bg-white max-h-[400px] overflow-y-auto mt-6 shadow-lg rounded-lg p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {displayableGoals.map((goal) => (
