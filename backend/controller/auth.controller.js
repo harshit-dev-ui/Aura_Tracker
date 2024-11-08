@@ -92,6 +92,7 @@ export const googleAuth = async (req, res) => {
           username: user.username,
           email: user.email,
           auraPoints: user.auraPoints,
+          googleId: user.googleId,
         },
       });
     } else {
@@ -110,6 +111,7 @@ export const googleAuth = async (req, res) => {
           username: user.username,
           email: user.email,
           auraPoints: user.auraPoints,
+          googleId: user.googleId,
         },
       });
     }
