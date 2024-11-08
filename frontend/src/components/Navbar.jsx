@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { CiLogout } from "react-icons/ci";
@@ -26,6 +26,14 @@ function Navbar() {
     }
   };
 
+  const handleLeaderboardClick = () => {
+    navigate("/leaderboard");
+  };
+
+  const handleDashboardClick = () => {
+    navigate("/dashboard");
+  };
+
   return (
     <div className="flex items-center justify-between bg-gray-800 h-14 w-full px-6 py-2">
       {/* Logo */}
@@ -33,7 +41,9 @@ function Navbar() {
 
       {/* Navbar buttons */}
       <div className="hidden md:flex gap-6">
-        <button className="text-white hover:text-gray-300 transition duration-200">
+        <button className="text-white hover:text-gray-300 transition duration-200"
+          onClick={handleDashboardClick}
+        >
           Dashboard
         </button>
         <button className="text-white hover:text-gray-300 transition duration-200">
@@ -42,7 +52,10 @@ function Navbar() {
         <button className="text-white hover:text-gray-300 transition duration-200">
           Goals
         </button>
-        <button className="text-white hover:text-gray-300 transition duration-200">
+        <button
+          className="text-white hover:text-gray-300 transition duration-200"
+          onClick={handleLeaderboardClick}
+        >
           LeaderBoard
         </button>
         <button className="text-white hover:text-gray-300 transition duration-200">

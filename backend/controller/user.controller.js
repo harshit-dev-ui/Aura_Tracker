@@ -30,3 +30,19 @@ export const getAuraPoints = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
+
+export const getLeaderboard = async (req, res) => {
+    try {
+        const users = await User.find().sort({ auraPoints: -1 }).limit(100).select("-password");
+
+        if (!users || users.length === 0) {
+            return res.status(404).json({ error: "No users found" });
+        }
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error in getLeaderboard:", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
