@@ -41,7 +41,8 @@ function Navbar() {
 
       {/* Navbar buttons */}
       <div className="hidden md:flex gap-6">
-        <button className="text-white hover:text-gray-300 transition duration-200"
+        <button
+          className="text-white hover:text-gray-300 transition duration-200"
           onClick={handleDashboardClick}
         >
           Dashboard
