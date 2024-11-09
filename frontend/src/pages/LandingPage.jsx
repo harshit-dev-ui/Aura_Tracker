@@ -5,10 +5,10 @@ const LandingPage = () => {
   const navigate = useNavigate();
   
   return (
-    <div className="bg-gray-900 text-white min-h-screen font-sans">
+    <div className="bg-gray-900 text-white min-h-screen font-sans flex flex-col">
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center bg-gradient-to-r from-indigo-700 to-purple-900 text-white py-24 px-6">
-        <h1 className="text-5xl font-extrabold text-center mb-6 leading-tight">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-6 leading-tight">
           Unlock Your Full Potential with Aura Tracker
         </h1>
         <p className="text-lg text-center mb-8 max-w-3xl">
@@ -90,7 +90,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer Section */}
-      <footer className="bg-gray-800 text-white py-6">
+      <footer className="bg-gray-800 text-white py-6 mt-auto">
         <div className="text-center">
           <p>&copy; 2024 Aura Tracker. All rights reserved.</p>
         </div>

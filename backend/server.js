@@ -38,6 +38,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/calendar", calendarRoutes);
+app.use("/api/questions",questionRoutes);
+app.use("/api/answers",answerRoutes);
 app.use("/api/rooms", roomRoutes);
 
 const server = http.createServer(app);
