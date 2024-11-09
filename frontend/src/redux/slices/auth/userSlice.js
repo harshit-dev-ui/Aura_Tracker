@@ -83,12 +83,6 @@ export const userSlice = createSlice({
         saveState(state);
       }
     },
-    updateAuraPoints: (state, action) => {
-      if (state.currentUser) {
-        state.currentUser.auraPoints = action.payload;
-        saveState(state);
-      }
-    },
   },
 });
 

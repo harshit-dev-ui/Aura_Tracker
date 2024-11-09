@@ -33,6 +33,9 @@ function Navbar() {
   const handleDashboardClick = () => {
     navigate("/dashboard");
   };
+  const handleRoomsClick = () => {
+    navigate("/rooms");
+  };
 
   return (
     <div className="flex items-center justify-between bg-gray-800 h-14 w-full px-6 py-2">
@@ -50,14 +53,15 @@ function Navbar() {
         <button className="text-white hover:text-gray-300 transition duration-200">
           Courses
         </button>
-        <button className="text-white hover:text-gray-300 transition duration-200">
-          Goals
+        <button className="text-white hover:text-gray-300 transition duration-200"
+          onClick={handleRoomsClick}>
+          Rooms
         </button>
         <button
           className="text-white hover:text-gray-300 transition duration-200"
           onClick={handleLeaderboardClick}
         >
-          LeaderBoard
+          Leaderboard
         </button>
         <button className="text-white hover:text-gray-300 transition duration-200">
           Rewards

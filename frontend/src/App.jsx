@@ -2,6 +2,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { Dashboard, Website, Login, Signup, Layout } from "./pages/index";
 import CourseDetail from "./components/CourseDetail";
 import Leaderboard from "./pages/Leaderboard";
+import Room from "./pages/Room";
+import StudyRoom from "./pages/StudyRoom";
 function App() {
   return (
     <main>
@@ -11,6 +13,8 @@ function App() {
           {/* Default route for Layout */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/rooms" element={<Room />} />
+          <Route path="/rooms/:roomId" element={<StudyRoom />} />
           <Route path="*" element={<Dashboard />} />
         </Route>
         <Route path="/courses/:courseId" element={<CourseDetail />} />
