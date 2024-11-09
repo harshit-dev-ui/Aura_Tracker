@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { Dashboard, Website, Login, Signup, Layout } from "./pages/index";
 import CourseDetail from "./components/CourseDetail";
 import Leaderboard from "./pages/Leaderboard";
+import DoubtsPage from "./pages/DoubtsPage";
 function App() {
   return (
     <main>
@@ -11,6 +12,7 @@ function App() {
           {/* Default route for Layout */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/doubts" element={<DoubtsPage />} />
           <Route path="*" element={<Dashboard />} />
         </Route>
         <Route path="/courses/:courseId" element={<CourseDetail />} />
