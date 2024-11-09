@@ -5,12 +5,14 @@ import Leaderboard from "./pages/Leaderboard";
 import Room from "./pages/Room";
 import StudyRoom from "./pages/StudyRoom";
 import Courses from "./pages/Courses";
+import LandingPage from "./pages/LandingPage"; // Import LandingPage component
+
 function App() {
   return (
     <main>
       <Routes>
         <Route element={<Layout />}>
-          <Route index path="/" element={<Navigate to="/dashboard" />} />
+          <Route index path="/" element={<Navigate to="/landing" />} />
           {/* Default route for Layout */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
@@ -23,6 +25,8 @@ function App() {
         <Route path="/website" element={<Website />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        <Route path="/landing" element={<LandingPage />} /> 
       </Routes>
     </main>
   );
