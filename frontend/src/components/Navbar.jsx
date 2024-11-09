@@ -40,7 +40,9 @@ function Navbar() {
   const handleCoursesClick = () => {
     navigate("/courses");
   };
-
+  const handleDoubtClick = () => {
+    navigate("/doubts");
+  };
   return (
     <div className="flex items-center justify-between bg-gray-800 h-14 w-full px-6 py-2">
       {/* Logo */}
@@ -61,6 +63,12 @@ function Navbar() {
         <button className="text-white hover:text-gray-300 transition duration-200"
           onClick={handleRoomsClick}>
           Rooms
+          </button>
+        <button
+          className="text-white hover:text-gray-300 transition duration-200"
+          onClick={handleDoubtClick}
+        >
+          Doubts
         </button>
         <button
           className="text-white hover:text-gray-300 transition duration-200"

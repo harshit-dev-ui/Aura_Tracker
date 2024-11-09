@@ -7,6 +7,7 @@ import StudyRoom from "./pages/StudyRoom";
 import Courses from "./pages/Courses";
 import LandingPage from "./pages/LandingPage"; // Import LandingPage component
 
+import DoubtsPage from "./pages/DoubtsPage";
 function App() {
   return (
     <main>
@@ -19,6 +20,7 @@ function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/rooms" element={<Room />} />
           <Route path="/rooms/:roomId" element={<StudyRoom />} />
+          <Route path="/doubts" element={<DoubtsPage />} />
           <Route path="*" element={<Dashboard />} />
         </Route>
         <Route path="/courses/:courseId" element={<CourseDetail />} />
