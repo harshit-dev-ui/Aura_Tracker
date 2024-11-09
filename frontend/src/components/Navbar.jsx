@@ -37,6 +37,10 @@ function Navbar() {
     navigate("/rooms");
   };
 
+  const handleCoursesClick = () => {
+    navigate("/courses");
+  };
+
   return (
     <div className="flex items-center justify-between bg-gray-800 h-14 w-full px-6 py-2">
       {/* Logo */}
@@ -50,7 +54,8 @@ function Navbar() {
         >
           Dashboard
         </button>
-        <button className="text-white hover:text-gray-300 transition duration-200">
+        <button className="text-white hover:text-gray-300 transition duration-200"
+         onClick={handleCoursesClick}>
           Courses
         </button>
         <button className="text-white hover:text-gray-300 transition duration-200"
